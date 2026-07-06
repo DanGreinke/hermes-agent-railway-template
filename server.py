@@ -273,13 +273,8 @@ class GatewayManager:
         except asyncio.CancelledError:
             return
         if self.process and self.process.returncode is not None and self.state == "running":
-            exit_code = self.process.returncode
             self.state = "error"
-            self.logs.append(f"Gateway exited with code {exit_code}")
-            if exit_code == 75:
-                self.logs.append("Detected planned restart (exit 75); auto-respawning gateway...")
-                self.restart_count += 1
-                asyncio.create_task(self.start())
+            self.logs.append(f"Gateway exited with code {self.process.returncode}")
 
     def get_status(self) -> dict:
         pid = None
