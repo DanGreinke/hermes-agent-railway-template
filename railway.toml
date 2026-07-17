@@ -3,7 +3,7 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "gateway run"
+startCommand = "/usr/local/bin/hermes-railway-entrypoint gateway run"
 healthcheckPath = "/api/status"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10

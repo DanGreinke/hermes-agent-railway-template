@@ -18,7 +18,7 @@ Use these service settings:
 
 | Setting | Value |
 |---|---|
-| Start command | `gateway run` |
+| Start command | `/usr/local/bin/hermes-railway-entrypoint gateway run` |
 | Volume mount | `/data` |
 | Public port | `8080` |
 | Health-check path | `/api/status` |
@@ -52,70 +52,6 @@ HERMES_GATEWAY_BOOTSTRAP_STATE=running
 The entrypoint maps `PORT` to `HERMES_DASHBOARD_PORT` at runtime.
 
 Provider credentials, messaging channels, models, skills, profiles, and gateway state are managed through the official dashboard and persisted under `/data/.hermes`.
-
-## Migrating an existing deployment
-
-The previous template already stores Hermes data under `/data/.hermes`. Keep the existing Railway service, domain, volume, and `/data` mount unchanged.
-
-Before changing the service:
-
-1. Stop the gateway and create a manual Railway volume backup.
-2. Record the current source commit and service variables for rollback.
-3. Apply the template update. Railway rebuilds this repository against the pinned official image.
-4. Verify that the start command is `gateway run` and the health check is `/api/status`; both are declared in `railway.toml`.
-5. Deploy and verify the dashboard, gateway, configured channels, sessions, memories, and skills. Existing `ADMIN_*` credentials and provider or messaging configuration in `/data/.hermes/.env` remain in place.
-
-Do not change the volume mount to `/opt/data` and do not move the existing data. To roll back, redeploy the previous repository commit; the old runtime will read the same untouched `/data/.hermes` directory.
-
-## Local verification
-
-The Compose configuration builds the same compatibility image Railway uses and preserves the `/data/.hermes` layout. Existing `ADMIN_USERNAME` and `ADMIN_PASSWORD` values are forwarded to the official dashboard variables. Without an `.env` file, the local credentials default to `admin` / `change-me`.
-
-To override the local credentials, create an environment file:
-
-```bash
-cp .env.example .env
-```
-
-Change the dashboard password and signing secret in `.env`, then run:
-
-```bash
-docker compose up -d
-```
-
-Open <http://localhost:8080>. Check container health and logs with:
-
-```bash
-docker compose ps
-docker compose logs -f hermes
-```
-
-Stop the service without deleting its persistent data:
-
-```bash
-docker compose down
-```
-
-Hermes state is stored in the ignored local `./data/.hermes` directory and survives `docker compose down`. Back up or remove `./data` manually when you want to preserve or reset the local test state.
-
-### Migrating the previous local named volume
-
-Earlier versions of this repository stored local state in the Docker volume `hermes-agent-railway-template_hermes-data`. Switching to the `./data` bind mount does not copy that volume automatically. To preserve the old state, stop Hermes, retain the newly created directory as a backup, and copy the old volume into a fresh `./data` directory:
-
-```bash
-docker compose down
-mv data "data.fresh-backup-$(date +%Y%m%d%H%M%S)"
-mkdir data
-docker run --rm \
-  --entrypoint /bin/sh \
-  -v hermes-agent-railway-template_hermes-data:/source:ro \
-  -v "$PWD/data:/destination" \
-  hermes-agent-railway-template:local \
-  -c 'cp -a /source/. /destination/'
-docker compose up --build
-```
-
-The source volume is mounted read-only and is not deleted. Verify the migrated sessions, configuration, provider keys, and messaging channels before removing either the old Docker volume or the timestamped backup directory.
 
 ## Upgrading Hermes
 
