@@ -9,10 +9,10 @@ Deploy [Hermes Agent](https://github.com/NousResearch/hermes-agent) on Railway u
 The Dockerfile is pinned to this official image:
 
 ```text
-nousresearch/hermes-agent:main@sha256:3fb7724c7ccf85d2bd64813fbc506868d5e190aa6cff170d3c8c7eb8e5d8a2cf
+nousresearch/hermes-agent:v2026.7.20@sha256:f7b35053268f532f98955195c909f15a230470fbcbdacaa9fdecb95707dad04a
 ```
 
-This immutable `main` digest includes upstream fix [#61178](https://github.com/NousResearch/hermes-agent/pull/61178), which keeps password-only dashboard authentication on the login form. The latest tagged release, `v2026.7.7.2`, predates that fix and crashes by routing `BasicAuthProvider` through the OAuth handler. Return to a tagged image once Nous Research publishes a release containing the fix.
+`v2026.7.20` (Hermes Agent v0.19.0, "The Quicksilver Release") is the first tagged release confirmed to carry the password-only dashboard auth fix — `/auth/login` now redirects password-capable providers straight to `/login` instead of crashing `BasicAuthProvider` through the OAuth `start_login()` path.
 
 Use these service settings:
 
