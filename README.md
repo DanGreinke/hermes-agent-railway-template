@@ -9,10 +9,10 @@ Deploy [Hermes Agent](https://github.com/NousResearch/hermes-agent) on Railway u
 The Dockerfile is pinned to this official image:
 
 ```text
-nousresearch/hermes-agent:v2026.7.20@sha256:f7b35053268f532f98955195c909f15a230470fbcbdacaa9fdecb95707dad04a
+nousresearch/hermes-agent:v2026.8.3@sha256:16788311e2fa3035456bdc1bafb8ec2b1777db64ebf020af9bb7eb73c3712c9e
 ```
 
-`v2026.7.20` (Hermes Agent v0.19.0, "The Quicksilver Release") is the first tagged release confirmed to carry the password-only dashboard auth fix — `/auth/login` now redirects password-capable providers straight to `/login` instead of crashing `BasicAuthProvider` through the OAuth `start_login()` path.
+`v2026.8.3` is Hermes Agent v0.20.0, "The Herald Release." The compatibility entrypoint delegates to this release's upstream entrypoint dispatcher so both normal PID-1 startup and Railway runtimes with an init wrapper are supported.
 
 Use these service settings:
 
@@ -56,5 +56,13 @@ Provider credentials, messaging channels, models, skills, profiles, and gateway 
 ## Upgrading Hermes
 
 Update the pinned release and digest in `Dockerfile` deliberately after reviewing the upstream [release notes](https://github.com/NousResearch/hermes-agent/releases) and validating the new image. Do not use `latest`. Because the template remains GitHub-backed, merging an upgrade to the default branch notifies existing template consumers.
+
+### Migrating from v0.19.0 to v0.20.0
+
+No environment-variable, dashboard-login, gateway, or volume-layout changes are required. Redeploy with the existing `/data` volume and credentials; Hermes migrates supported configuration and persistent state on startup.
+
+v0.20.0 only auto-migrates configuration version 12 or newer. This includes normal v0.19.0 deployments. If startup logs say the configuration predates version 12, back up `/data/.hermes/config.yaml` and run `hermes setup` to regenerate it as instructed by Hermes.
+
+Before upgrading, snapshot or back up `/data`. To roll back, restore that snapshot and redeploy the previous image, `nousresearch/hermes-agent:v2026.7.20@sha256:f7b35053268f532f98955195c909f15a230470fbcbdacaa9fdecb95707dad04a`. Do not run the older image against data already migrated by v0.20.0 because downgrade compatibility is not guaranteed.
 
 See the official [Hermes Docker documentation](https://hermes-agent.nousresearch.com/docs/user-guide/docker) for image behavior and configuration details.

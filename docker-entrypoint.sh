@@ -22,4 +22,4 @@ export HERMES_DASHBOARD_BASIC_AUTH_USERNAME="$dashboard_username"
 export HERMES_DASHBOARD_BASIC_AUTH_PASSWORD="$dashboard_password"
 export HERMES_DASHBOARD_BASIC_AUTH_SECRET="$dashboard_secret"
 
-exec /init /opt/hermes/docker/main-wrapper.sh "$@"
+exec /opt/hermes/docker/entrypoint-dispatch.sh "$@"
