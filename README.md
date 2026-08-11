@@ -57,12 +57,4 @@ Provider credentials, messaging channels, models, skills, profiles, and gateway 
 
 Update the pinned release and digest in `Dockerfile` deliberately after reviewing the upstream [release notes](https://github.com/NousResearch/hermes-agent/releases) and validating the new image. Do not use `latest`. Because the template remains GitHub-backed, merging an upgrade to the default branch notifies existing template consumers.
 
-### Migrating from v0.19.0 to v0.20.0
-
-No environment-variable, dashboard-login, gateway, or volume-layout changes are required. Redeploy with the existing `/data` volume and credentials; Hermes migrates supported configuration and persistent state on startup.
-
-v0.20.0 only auto-migrates configuration version 12 or newer. This includes normal v0.19.0 deployments. If startup logs say the configuration predates version 12, back up `/data/.hermes/config.yaml` and run `hermes setup` to regenerate it as instructed by Hermes.
-
-Before upgrading, snapshot or back up `/data`. To roll back, restore that snapshot and redeploy the previous image, `nousresearch/hermes-agent:v2026.7.20@sha256:f7b35053268f532f98955195c909f15a230470fbcbdacaa9fdecb95707dad04a`. Do not run the older image against data already migrated by v0.20.0 because downgrade compatibility is not guaranteed.
-
 See the official [Hermes Docker documentation](https://hermes-agent.nousresearch.com/docs/user-guide/docker) for image behavior and configuration details.
