@@ -1,39 +1,13 @@
-FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim
+FROM nousresearch/hermes-agent:v0.22.2@sha256:36099926da316742423544e055d4734777105ffe6341873af5459b957d0c2919
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl ca-certificates git ffmpeg tini && \
-    rm -rf /var/lib/apt/lists/*
+COPY --chmod=0755 docker-entrypoint.sh /usr/local/bin/hermes-railway-entrypoint
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends gnupg && \
-    mkdir -p /etc/apt/keyrings && \
-    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
-    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_24.x nodistro main" > /etc/apt/sources.list.d/nodesource.list && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends nodejs && \
-    apt-get purge -y --auto-remove gnupg && \
-    rm -rf /var/lib/apt/lists/*
+ENV HERMES_HOME=/data/.hermes \
+    HERMES_WRITE_SAFE_ROOT=/data/.hermes \
+    HERMES_LAZY_INSTALL_TARGET=/data/.hermes/lazy-packages \
+    HERMES_DASHBOARD=1 \
+    HERMES_DASHBOARD_HOST=0.0.0.0 \
+    HERMES_GATEWAY_BOOTSTRAP_STATE=running
 
-RUN node --version && npm --version
-
-ARG HERMES_VERSION=v0.22.2
-RUN git clone --depth 1 --branch ${HERMES_VERSION} https://github.com/NousResearch/hermes-agent.git /tmp/hermes-agent && \
-    cd /tmp/hermes-agent && \
-    uv pip install --system --no-cache -e ".[all]" && \
-    rm -rf /tmp/hermes-agent/.git
-
-COPY requirements.txt /app/requirements.txt
-RUN uv pip install --system --no-cache -r /app/requirements.txt
-
-RUN mkdir -p /data/.hermes
-
-COPY server.py /app/server.py
-COPY templates/ /app/templates/
-COPY start.sh /app/start.sh
-RUN chmod +x /app/start.sh
-
-ENV HOME=/data
-ENV HERMES_HOME=/data/.hermes
-
-ENTRYPOINT ["tini", "--"]
-CMD ["/app/start.sh"]
+ENTRYPOINT ["/usr/local/bin/hermes-railway-entrypoint"]
+CMD ["gateway", "run"]
